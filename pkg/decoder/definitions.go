@@ -770,7 +770,7 @@ func (a ActivityChangeInfo) Decode() DecodedActivityChangeInfo {
 	// ttttttttttt - minutes since 0:00 that day
 	var v uint16
 	b := bytes.NewBuffer([]byte{a[0], a[1]})
-	binary.Read(b, binary.BigEndian, &v)
+	binary.Read(b, binary.LittleEndian, &v)
 	driver := (v & 0x8000) > 0
 	team := (v & 0x4000) > 0
 	cardPresent := (v & 0x2000) > 0
