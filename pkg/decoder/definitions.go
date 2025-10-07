@@ -761,22 +761,24 @@ type DecodedActivityChangeInfo struct {
 }
 
 func (a ActivityChangeInfo) Decode() DecodedActivityChangeInfo {
-		// Bits layout (16-bit):
-	// s c p aa ttttttttttt
-	// s - 0: driver, 1: codriver
-	// c - 0: one man, 1: team
-	// p - 0: data inserted, 1: no data
-	// aa - 00: break, 01: availability, 10: work, 11: driving
-	// ttttttttttt - minutes since 0:00 that day
-	var v uint16
-	b := bytes.NewBuffer([]byte{a[0], a[1]})
-	binary.Read(b, binary.BigEndian, &v)
+	var vBig, vLittle uint16
 
-	driver := (v & 0x8000) > 0
-	team := (v & 0x4000) > 0
-	cardPresent := (v & 0x2000) > 0
-	workType := byte((v & 0x1800) >> 11)
-	minutes := int(v & 0x07FF)
+	// --- Decode Big Endian ---
+	bBig := bytes.NewBuffer([]byte{a[0], a[1]})
+	binary.Read(bBig, binary.BigEndian, &vBig)
+
+	// --- Decode Little Endian ---
+	bLittle := bytes.NewBuffer([]byte{a[0], a[1]})
+	binary.Read(bLittle, binary.LittleEndian, &vLittle)
+
+	// Extract fields (BigEndian for most)
+	driver := (vBig & 0x8000) > 0
+	team := (vBig & 0x4000) > 0
+	cardPresent := (vBig & 0x2000) > 0
+	minutes := int(vBig & 0x07FF)
+
+	// Extract WorkType using LittleEndian version
+	workType := byte((vLittle & 0x1800) >> 11)
 
 	return DecodedActivityChangeInfo{
 		Driver:      driver,
@@ -786,6 +788,7 @@ func (a ActivityChangeInfo) Decode() DecodedActivityChangeInfo {
 		Minutes:     minutes,
 	}
 }
+
 
 	// Extract minutes
 	minutes := int(v & 0x07FF)
