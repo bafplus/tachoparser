@@ -774,7 +774,7 @@ func (a ActivityChangeInfo) Decode() DecodedActivityChangeInfo {
 	driver := (v & 0x8000) > 0
 	team := (v & 0x4000) > 0
 	cardPresent := (v & 0x2000) > 0
-	workType := byte((v & 0x1800) >> 11) // 00011000 00000000
+	workType := byte((v & 0x1800) >> 11) // Extract bits 12-11 for work type: 00=break, 01=on duty, 10=work, 11=drive
 	minutes := int(v & 0x07FF)
 	s := DecodedActivityChangeInfo{
 		Driver:      driver,
